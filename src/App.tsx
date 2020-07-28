@@ -6,7 +6,7 @@ declare const global: {HermesInternal: null | {}};
 const App = () => {
   return (
     <View>
-      <Text>Oi</Text>
+      <Text>Letícia né</Text>
     </View>
   );
 };
