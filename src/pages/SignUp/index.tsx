@@ -18,6 +18,7 @@ import {Form} from '@unform/mobile';
 import {FormHandles} from '@unform/core';
 import * as Yup from 'yup';
 import getValidationErrors from '../../utils/getValidationErrors';
+import api from '../../services/api';
 
 interface SignUpData {
   name: string;
@@ -32,30 +33,44 @@ const SignUp: React.FC = () => {
 
   const navigation = useNavigation();
 
-  const handleSignUp = useCallback(async (data: object) => {
-    formRef.current?.setErrors({});
+  const handleSignUp = useCallback(
+    async (data: object) => {
+      formRef.current?.setErrors({});
 
-    try {
-      const schema = Yup.object().shape({
-        name: Yup.string().required('Nome obrigatório'),
-        email: Yup.string()
-          .required('Email obrigatório')
-          .email('Digite um e-mail válido'),
-        password: Yup.string().min(6, 'Mínimo de 6 caracteres'),
-      });
+      try {
+        const schema = Yup.object().shape({
+          name: Yup.string().required('Nome obrigatório'),
+          email: Yup.string()
+            .required('Email obrigatório')
+            .email('Digite um e-mail válido'),
+          password: Yup.string().min(6, 'Mínimo de 6 caracteres'),
+        });
 
-      await schema.validate(data, {
-        abortEarly: false,
-      });
-    } catch (err) {
-      const errors = getValidationErrors(err);
-      formRef.current?.setErrors(errors);
-    }
-    Alert.alert(
-      'Erro no cadastro',
-      'Ocorreu um erro ao fazer o cadastro. Tente novamente.',
-    );
-  }, []);
+        console.log('Meus dados: ', data);
+
+        await schema.validate(data, {
+          abortEarly: false,
+        });
+
+        await api.post('/users', data);
+
+        Alert.alert(
+          'Cadastro realizado com sucesso!',
+          'Você já pode fazer login na aplicação.',
+        );
+
+        navigation.navigate('SignIn');
+      } catch (err) {
+        const errors = getValidationErrors(err);
+        formRef.current?.setErrors(errors);
+      }
+      Alert.alert(
+        'Erro no cadastro',
+        'Ocorreu um erro ao fazer o cadastro. Tente novamente.',
+      );
+    },
+    [navigation],
+  );
 
   return (
     <>
@@ -113,7 +128,7 @@ const SignUp: React.FC = () => {
               onPress={() => {
                 formRef.current?.submitForm();
               }}>
-              Entrar
+              Cadastrar
             </Button>
           </Container>
         </ScrollView>
