@@ -33,44 +33,44 @@ const SignUp: React.FC = () => {
 
   const navigation = useNavigation();
 
-  const handleSignUp = useCallback(
-    async (data: object) => {
-      formRef.current?.setErrors({});
+  const handleSignUp = useCallback(async (data: object) => {
+    formRef.current?.setErrors({});
 
-      try {
-        const schema = Yup.object().shape({
-          name: Yup.string().required('Nome obrigatório'),
-          email: Yup.string()
-            .required('Email obrigatório')
-            .email('Digite um e-mail válido'),
-          password: Yup.string().min(6, 'Mínimo de 6 caracteres'),
-        });
+    try {
+      const schema = Yup.object().shape({
+        name: Yup.string().required('Nome obrigatório'),
+        email: Yup.string()
+          .required('Email obrigatório')
+          .email('Digite um e-mail válido'),
+        password: Yup.string().min(6, 'Mínimo de 6 caracteres'),
+      });
 
-        console.log('Meus dados: ', data);
+      await schema.validate(data, {
+        abortEarly: false,
+      });
 
-        await schema.validate(data, {
-          abortEarly: false,
-        });
+      await api.post('/users', data);
 
-        await api.post('/users', data);
+      Alert.alert(
+        'Cadastro realizado com sucesso!',
+        'Você já pode fazer login na aplicação.',
+      );
 
-        Alert.alert(
-          'Cadastro realizado com sucesso!',
-          'Você já pode fazer login na aplicação.',
-        );
-
-        navigation.navigate('SignIn');
-      } catch (err) {
+      navigation.goBack();
+    } catch (err) {
+      if (err instanceof Yup.ValidationError) {
         const errors = getValidationErrors(err);
         formRef.current?.setErrors(errors);
+
+        Alert.alert(
+          'Erro no cadastro',
+          'Ocorreu um erro ao fazer o cadastro. Tente novamente.',
+        );
+
+        return;
       }
-      Alert.alert(
-        'Erro no cadastro',
-        'Ocorreu um erro ao fazer o cadastro. Tente novamente.',
-      );
-    },
-    [navigation],
-  );
+    }
+  }, []);
 
   return (
     <>
