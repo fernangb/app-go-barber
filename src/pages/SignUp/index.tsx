@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useRef, useCallback} from 'react';
 import {
   Image,
@@ -70,6 +71,7 @@ const SignUp: React.FC = () => {
         return;
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

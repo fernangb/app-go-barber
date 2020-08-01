@@ -26,6 +26,8 @@ import {FormHandles} from '@unform/core';
 import * as Yup from 'yup';
 import getValidationErrors from '../../utils/getValidationErrors';
 
+import {useAuth} from '../../hooks/auth';
+
 interface SignInFormData {
   email: string;
   password: string;
@@ -36,6 +38,10 @@ const SignIn: React.FC = () => {
   const passwordInpuRef = useRef<TextInput>(null);
 
   const navigation = useNavigation();
+
+  const {signIn, user} = useAuth();
+
+  console.log(user);
 
   const handleSignIn = useCallback(async (data: SignInFormData) => {
     formRef.current?.setErrors({});
@@ -52,18 +58,24 @@ const SignIn: React.FC = () => {
         abortEarly: false,
       });
 
-      // signIn({
-      //   email: data.email,
-      //   password: data.password,
-      // });
+      signIn({
+        email: data.email,
+        password: data.password,
+      });
     } catch (err) {
-      const errors = getValidationErrors(err);
-      formRef.current?.setErrors(errors);
+      if (err instanceof Yup.ValidationError) {
+        const errors = getValidationErrors(err);
+        console.log(errors);
+        formRef.current?.setErrors(errors);
+        return;
+      }
+      Alert.alert(
+        'Erro na autenticação',
+        'Ocorreu um erro ao fazer o login. Verifique as suas credenciais.',
+      );
     }
-    Alert.alert(
-      'Erro na autenticação',
-      'Ocorreu um erro ao fazer o login. Verifique as suas credenciais.',
-    );
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
